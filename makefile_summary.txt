@@ -1,0 +1,60 @@
+MAKEFILE SUMMARY - Robot World Application Build Script
+========================================================
+
+WHAT IS A MAKEFILE?
+A Makefile is an automation script that runs commands for you. Instead of typing long 
+commands, you just type "make [command-name]" and it does the work.
+
+CONFIGURATION (TOP SECTION)
+- Sets up paths to server files and ports (5000, 5050)
+- Defines Docker image name as "robot-worlds"
+- Points to Maven build tool
+- Gets version number from project files
+
+MAIN COMMANDS YOU CAN RUN:
+
+BUILD COMMANDS:
+- make compile     = Turn Java code into runnable files
+- make build       = Clean everything and compile from scratch
+- make package     = Bundle code into JAR files (like .exe for Java)
+- make all         = Run complete pipeline: build + test + package
+
+TESTING COMMANDS:
+- make run-unittests  = Test individual code pieces
+- make run-ref-tests  = Test against reference server
+- make run-own-tests  = Test your server implementation
+
+DOCKER COMMANDS (Containerization):
+- make docker-build  = Package app with everything it needs to run
+- make docker-run    = Start the app in a container
+- make docker-stop   = Stop the running container
+- make docker-logs   = View what the container is doing
+- make push          = Upload container to shared registry
+
+VERSION/RELEASE COMMANDS:
+- make print-version    = Show current version number
+- make remove-snapshot  = Remove "-SNAPSHOT" from version
+- make release          = Full release: test + version + upload to git
+
+SPECIAL COMMANDS:
+- make test-docker  = Test the containerized version
+- make help         = Show available commands
+
+HOW IT WORKS:
+1. You type "make build" in terminal
+2. Makefile runs Maven commands to compile Java code
+3. Creates JAR files you can run
+4. Shows success/error messages
+
+WHY USE THIS:
+- Saves time (no need to remember complex commands)
+- Consistent builds for whole team
+- Automates testing and deployment
+- Reduces human errors
+
+EXAMPLE WORKFLOW:
+1. make build          (compile everything)
+2. make run-unittests  (test your code)
+3. make docker-run     (start the server)
+4. make docker-logs    (check if it's working)
+5. make docker-stop    (shut it down)

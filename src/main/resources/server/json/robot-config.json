@@ -1,0 +1,20 @@
+{
+  "range": {
+    "attack": "active",
+    "range": 5,
+    "ammo": 2,
+    "shield": 2
+  },
+  "shots": {
+    "attack": "active",
+    "range": 3,
+    "ammo": 4,
+    "shield": 4
+  },
+  "mines": {
+    "attack": "passive",
+    "range": 0,
+    "ammo": 3,
+    "shield": 9
+  }
+}

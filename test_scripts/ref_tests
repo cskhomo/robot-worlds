@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Configuration
+REF_SERVER_JAR="libs/reference-server-0.2.3.jar"
+REF_SERVER_PORT=5000
+MVN_CMD="mvn"
+SLEEP_TIME=3
+
+# Map of scenarios
+declare -A SCENARIOS
+SCENARIOS["1x1"]="-s 1"
+SCENARIOS["2x2"]="-s 2"
+SCENARIOS["Obstacle"]="-s 2 -o 0,1"
+
+
+# Functions
+run_ref_server() {
+    local scenario_key=$1
+    local args=${SCENARIOS[$scenario_key]:-}
+
+    echo "Starting reference server for scenario [$scenario_key]..."
+    java -jar "$REF_SERVER_JAR" -p $REF_SERVER_PORT $args > ref-server.log 2>&1 &
+    local REF_PID=$!
+    echo "Reference server started (PID $REF_PID)"
+    sleep $SLEEP_TIME
+
+    echo "Running acceptance tests against reference server..."
+    $MVN_CMD test -Dtest="*${scenario_key}*" -DfailIfNoTests=false
+
+    echo "Stopping reference server (PID $REF_PID)..."
+    kill $REF_PID 2>/dev/null || true
+    wait $REF_PID 2>/dev/null || true
+    echo "Reference server stopped successfully"
+    echo "----------------------------------------"
+}
+
+
+# Main
+echo "Building project..."
+$MVN_CMD clean package -DskipTests=true
+
+echo "Running acceptance tests against REFERENCE server..."
+for scenario in "${!SCENARIOS[@]}"; do
+    run_ref_server "$scenario"
+done
+
+echo "All reference server tests completed successfully."

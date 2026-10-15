@@ -1,0 +1,70 @@
+GITLAB CI/CD PIPELINE EXPLANATION
+==================================
+
+WHAT IS THIS FILE?
+The .gitlab-ci.yml file is like a recipe that tells GitLab how to automatically 
+build, test, and deploy your code every time you push changes to the repository.
+
+THINK OF IT LIKE AN ASSEMBLY LINE:
+Just like a car factory has stations where different work happens in order,
+this pipeline has "stages" that run one after another.
+
+OUR PIPELINE STAGES (in order):
+
+1. CLEANUP STAGE
+   - What it does: Cleans up old Docker containers and images
+   - Why: Prevents storage from filling up with old builds
+   - Like: Clearing your workspace before starting work
+
+2. COMPILE STAGE  
+   - What it does: Turns your Java source code into runnable files
+   - Uses: Maven (Java build tool) and our Makefile
+   - Like: Translating a recipe into actual food ingredients
+   - Creates: Compiled files in the "target/" folder
+
+3. TEST STAGE
+   - What it does: Runs unit tests to check individual code pieces work
+   - Uses: Maven to run JUnit tests
+   - Like: Testing each car part before assembly
+   - Stops pipeline if any test fails
+
+4. ACCEPTANCE STAGE
+   - What it does: Tests the whole application works correctly
+   - Runs tests against both reference server and your server
+   - Like: Test driving the complete car
+   - Uses test reports to show results
+
+5. PACKAGE STAGE
+   - What it does: Bundles everything into JAR files (Java executables)
+   - Like: Putting the finished car in the showroom
+   - Creates: .jar files you can actually run
+
+6. DEPLOY STAGE
+   - What it does: Packages app in Docker and uploads to registry
+   - Like: Shipping the car to dealerships
+   - Creates: Docker image that can run anywhere
+
+KEY CONCEPTS:
+
+DEPENDENCIES:
+- Each stage waits for previous ones to finish successfully
+- If any stage fails, the pipeline stops (fail-fast)
+
+ARTIFACTS:
+- Files created by one stage that other stages need
+- Like passing materials down an assembly line
+
+DOCKER IMAGES:
+- Each job runs in a fresh, clean computer environment
+- Ensures consistent builds regardless of where it runs
+
+WHEN DOES THIS RUN?
+- Automatically every time you push code to GitLab
+- Runs in GitLab's cloud computers, not your laptop
+- Takes about 5-10 minutes to complete all stages
+
+WHY IS THIS USEFUL?
+- Catches bugs before they reach production
+- Ensures code works on different computers
+- Automates boring, repetitive tasks
+- Gives confidence that your code is ready to ship

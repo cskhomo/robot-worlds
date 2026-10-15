@@ -1,0 +1,104 @@
+stages:
+  - cleanup
+  - compile
+  - test
+  - acceptance
+  - package
+  - deploy
+
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=m2/repository"
+  IMAGE_NAME: "robot-world"
+  HOST_PORT: 5000
+  CONTAINER_PORT: 5000
+  IMAGE_TAG: "$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA"
+
+before_script:
+  - echo "Setting up build environment..."
+
+
+cache:
+  paths:
+    - .m2/repository
+
+cleanup-job:
+  stage: cleanup
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  script:
+    - echo "Cleaning up Docker environment..."
+    -  docker system prune -a --volumes -f || true
+
+compile-job:
+  stage: compile
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - echo "installing make..."
+    - apt-get update && apt-get install -y make
+    - echo "Compile project using Maven..."
+    - make build
+  artifacts:
+    paths:
+      - target/
+
+test-job:
+  stage: test
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - echo "Running unit tests..."
+    - mvn test
+  dependencies:
+    - compile-job
+  artifacts:
+    reports:
+      junit:
+        - target/surefire-reports/*.xml
+#mmm
+
+acceptance-job:
+  stage: acceptance
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - echo "Running acceptance tests against reference and own server..."
+    - make run-ref-tests
+    - make run-own-tests
+  dependencies:
+    - compile-job
+    - test-job
+  artifacts:
+    reports:
+      junit:
+        - target/failsafe-reports/*.xml
+
+package-job:
+  stage: package
+  image: maven:3.9.6-eclipse-temurin-21
+  script:
+    - echo "Package application..."
+    - make package
+  dependencies:
+    - compile-job
+    - test-job
+    - acceptance-job
+  artifacts:
+    paths:
+      - target/*.jar
+
+deploy-job:
+  stage: deploy
+  image: docker:20.10.7
+  services:
+    - docker:20.10.7-dind
+  script:
+    - echo "Deploying Docker image to Gitlab Container Registry..."
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" "$CI_REGISTRY"
+    - docker build -t "$IMAGE_TAG" .
+    - docker push "$IMAGE_TAG"
+    - echo "Running container locally..."
+    - docker run -d -p $HOST_PORT:$CONTAINER_PORT "$IMAGE_TAG"
+
+
+
+

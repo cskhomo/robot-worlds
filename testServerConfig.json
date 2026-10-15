@@ -1,0 +1,34 @@
+{
+  "visibility": 3,
+  "maxBullets": 4,
+  "maxShields": 5,
+  "repairTime": 3,
+  "reloadTime": 3,
+  "obstacles": [
+    {
+      "type": "bottomlessPits",
+      "topLeft": [
+        1,
+        1
+      ],
+      "bottomRight": [
+        1,
+        1
+      ]
+    },
+    {
+      "type": "mountain",
+      "topLeft": [
+        0,
+        1
+      ],
+      "bottomRight": [
+        0,
+        1
+      ]
+    }
+
+  ],
+  "width": 3,
+  "height": 3
+}

@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Configuration
+MVN_CMD="mvn"
+
+echo "Building project..."
+$MVN_CMD clean compile -DskipTests=true
+
+echo "Running only unit tests..."
+# Run tests in packages under UnitTests only
+$MVN_CMD test \
+    -Dtest="za.co.wethinkcode.robots.server.UnitTests.**" \
+    -DfailIfNoTests=false
+
+echo "Unit tests completed successfully."

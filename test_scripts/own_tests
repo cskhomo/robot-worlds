@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+
+# Configuration
+OWN_SERVER_MAIN_CLASS="za.co.wethinkcode.robots.server.Server"
+MVN_CMD="mvn"
+SLEEP_TIME=3
+
+# Map of scenarios
+declare -A SCENARIOS
+SCENARIOS["1x1"]="-s 1"
+SCENARIOS["2x2"]="-s 2"
+SCENARIOS["Obstacle"]="-s 2 -o 0,1"
+
+
+# Functions
+run_own_server() {
+    local scenario_key=$1
+    local args=${SCENARIOS[$scenario_key]:-}
+
+    echo "Starting own server for scenario [$scenario_key]..."
+    nohup $MVN_CMD exec:java \
+        -Dexec.mainClass="$OWN_SERVER_MAIN_CLASS" \
+        -Dexec.args="$args" \
+        > own-server.log 2>&1 &
+    local OWN_PID=$!
+    echo "Own server started (PID $OWN_PID)"
+    sleep $SLEEP_TIME
+
+    echo "Running acceptance tests against own server..."
+    $MVN_CMD test -Dtest="*${scenario_key}*" -DfailIfNoTests=false
+
+    echo "Stopping own server (PID $OWN_PID)..."
+    kill $OWN_PID 2>/dev/null || true
+    wait $OWN_PID 2>/dev/null || true
+    echo "Own server stopped successfully"
+    echo "----------------------------------------"
+}
+
+
+# Main
+echo "Building project..."
+$MVN_CMD clean package -DskipTests=true
+
+echo "Running acceptance tests against OWN server..."
+for scenario in "${!SCENARIOS[@]}"; do
+    run_own_server "$scenario"
+done
+
+echo "All own server tests completed successfully."

@@ -1,0 +1,17 @@
+{
+  "width": 1,
+  "height": 1,
+  "visibility": 3,
+
+  "setMineTime": 3,
+  "reloadTime": 3,
+  "repairTime": 3,
+
+  "obstacles": [
+    {
+      "type": "bottomlessPits",
+      "topLeft": [1,1],
+      "bottomRight": [1,1]
+    }
+  ]
+}
